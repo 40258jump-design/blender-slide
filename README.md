@@ -2,6 +2,14 @@
 
 Blender Slide is a Blender add-on that allows collections to be used as presentation slides.
 
+
+# Blender Slide
+
+![Blender Slide Panel](images/panel.png)
+
+Blender Slide is a Blender add-on that allows collections to be used as presentation slides.
+
+
 ## Features
 
 - Collection based slides
