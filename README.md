@@ -7,12 +7,12 @@ Blender Slide is a Blender add-on that allows collections to be used as presenta
 
 ## Features
 
-- Collection based slides
-- Next / Previous navigation
-- EXCLUDE mode
-- HIDE mode
-- Presentation workspace
-- Optional shortcuts
+- Manage Blender Collections as slides
+- Switch slides with Previous / Next buttons
+- Exclude mode: lightweight and affects rendering
+- Hide mode: viewport-only and does not affect rendering
+- Create a presentation-friendly workspace
+- Optional PageUp / PageDown shortcuts
 
 ## Installation
 
