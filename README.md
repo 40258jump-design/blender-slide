@@ -2,8 +2,7 @@
 
 ![Blender Slide Panel](images/panel.png)
 
-Blender Slide is a Blender add-on that allows collections to be used as presentation slides.
-
+Blender Slide turns your Blender Collections into a simple slide presentation, so you can walk clients, classmates, or viewers through your 3D work without leaving Blender.
 
 ## Features
 
@@ -11,14 +10,14 @@ Blender Slide is a Blender add-on that allows collections to be used as presenta
 - Switch slides with Previous / Next buttons
 - Exclude mode: lightweight and affects rendering
 - Hide mode: viewport-only and does not affect rendering
-- Create a presentation-friendly workspace
+- Create a clean presentation-friendly workspace
 - Optional PageUp / PageDown shortcuts
 
 ## Installation
 
 Requires Blender 4.2 or later.
 
-1. Download `blender_slide.py` from the latest release.
+1. Download [`blender_slide.py`](../../releases/latest) from the latest release.
 2. Open Blender.
 3. Go to `Edit > Preferences > Add-ons`.
 4. Click `Install from Disk`.
@@ -31,28 +30,32 @@ The Blender Slide panel is located in the 3D Viewport sidebar.
 
 Press `N` in the 3D Viewport, then open the `Blender Slide` tab.
 
-## Blender Version
-
-4.2+
-
 ## Usage
 
-1. Create collections for each slide.
-2. Select a collection in Blender.
+1. Create Collections for each slide.
+2. Make the Collection you want to add active.
 3. Click the `+` button in the Blender Slide panel to add it as a slide.
 4. Use `Prev` / `Next` to switch slides.
-5. Use `Presentation Workspace` to create a workspace for presenting.
+5. Use `Presentation Workspace` to create a clean workspace optimized for presenting your slides.
+
+## Presentation Workspace
+
+The `Presentation Workspace` button creates a clean Blender workspace for presenting.
+
+It switches the 3D Viewport to camera view and hides overlays, gizmos, the toolbar, the sidebar, and the header.
 
 ## Switch Methods
 
 ### Exclude
 
-Excludes non-current slide collections from the view layer.  
+Excludes non-current slide collections from the View Layer.
+
 This is lightweight and also affects rendering.
 
 ### Hide
 
-Hides non-current slide collections in the viewport only.  
+Hides non-current slide collections in the viewport only.
+
 This does not affect rendering.
 
 ## Shortcuts
@@ -74,6 +77,12 @@ You can change them in `Preferences > Keymap` by searching for:
 
 - `blender_slide.prev`
 - `blender_slide.next`
+
+## Notes
+
+- Collection names are used as slide labels.
+- Slides are ordered by the order they were added.
+- Some generic UI labels may be translated automatically depending on Blender's language setting.
 
 ## License
 
