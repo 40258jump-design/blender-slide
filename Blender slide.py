@@ -1,10 +1,26 @@
+# Blender Slide - present collections as slides in Blender.
+# Copyright (C) 2026 Naga
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 bl_info = {
     "name": "Blender Slide",
     "author": "Naga",
-    "version": (1, 5, 1),
+    "version": (1, 6, 0),
     "blender": (4, 2, 0),
-    "location": "View3D > サイドバー(N) > Blender Slide",
-    "description": "登録したコレクションをスライドとして表示切替するアドオン",
+    "location": "View3D > Sidebar (N) > Blender Slide",
+    "description": "Present registered collections as slides in Blender",
     "doc_url": "https://github.com/40258jump-design/blender-slide",
     "tracker_url": "https://github.com/40258jump-design/blender-slide/issues",
     "category": "3D View",
@@ -14,10 +30,11 @@ import bpy
 
 
 # ============================================================
-# コア関数：現在のスライドだけ表示し、他は隠す
+# Core: show only the current slide, hide the others
 # ============================================================
 def _find_layer_collection(view_layer, target_coll):
-    """指定の Collection に対応する LayerCollection を再帰的に探す（同一性で照合）"""
+    """Recursively find the LayerCollection that wraps the given Collection
+    (matched by identity)."""
     def rec(lc):
         if lc.collection == target_coll:
             return lc
@@ -31,7 +48,7 @@ def _find_layer_collection(view_layer, target_coll):
 
 
 def _restore_collection(context, coll):
-    """コレクションをスライド管理から外す際、通常の表示状態へ戻す"""
+    """Restore normal visibility when a collection leaves slide management."""
     if coll is None:
         return
 
@@ -42,7 +59,7 @@ def _restore_collection(context, coll):
 
 
 def apply_slide_visibility(context):
-    """切替方法に従って、現在のスライドだけ表示する"""
+    """Show only the current slide according to the switch method."""
     props = context.scene.blender_slide
     slides = props.slides
 
@@ -73,7 +90,7 @@ def apply_slide_visibility(context):
 
 
 # ============================================================
-# プロパティ
+# Properties
 # ============================================================
 def _on_index_update(self, context):
     apply_slide_visibility(context)
@@ -85,7 +102,7 @@ def _on_method_update(self, context):
 
 class BS_SlideItem(bpy.types.PropertyGroup):
     collection: bpy.props.PointerProperty(
-        name="コレクション",
+        name="Collection",
         type=bpy.types.Collection,
     )
 
@@ -100,24 +117,26 @@ class BS_Props(bpy.types.PropertyGroup):
     )
 
     switch_method: bpy.props.EnumProperty(
-        name="切替方法",
+        name="Switch Method",
         items=[
-            ('EXCLUDE', "除外", "ビューレイヤーから除外（軽い・レンダリングにも反映）"),
-            ('HIDE', "非表示", "ビューポートのみ非表示（レンダリングには影響しない）"),
+            ('EXCLUDE', "Exclude",
+             "Exclude from the view layer (lightweight, affects renders)"),
+            ('HIDE', "Hide",
+             "Hide in the viewport only (does not affect renders)"),
         ],
         default='EXCLUDE',
         update=_on_method_update,
     )
 
     start_frame: bpy.props.IntProperty(
-        name="開始フレーム",
-        description="「最初に戻る」を押したときに移動するフレーム",
+        name="Start Frame",
+        description="Frame to jump to when pressing \"Back to Start\"",
         default=1,
     )
 
 
 # ============================================================
-# UIList：スライド一覧
+# UIList: slide list
 # ============================================================
 class BS_UL_slides(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon,
@@ -135,43 +154,45 @@ class BS_UL_slides(bpy.types.UIList):
             )
         else:
             row.label(
-                text="%d. (未設定)" % (index + 1),
+                text="%d. (missing)" % (index + 1),
                 icon='ERROR',
             )
 
 
 # ============================================================
-# オペレーター
+# Operators
 # ============================================================
 class BS_OT_add(bpy.types.Operator):
     bl_idname = "blender_slide.add"
-    bl_label = "追加"
-    bl_description = "アクティブなコレクションをスライドに追加"
+    bl_label = "Add"
+    bl_description = "Add the active collection as a slide"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         props = context.scene.blender_slide
         active_coll = context.view_layer.active_layer_collection.collection
 
         if active_coll is None or active_coll == context.scene.collection:
-            self.report({'WARNING'}, "追加したいコレクションをアクティブにしてください")
+            self.report({'WARNING'}, "Make the collection you want to add active")
             return {'CANCELLED'}
 
         if any(s.collection == active_coll for s in props.slides):
-            self.report({'INFO'}, "「%s」は既に登録済みです" % active_coll.name)
+            self.report({'INFO'}, "\"%s\" is already registered" % active_coll.name)
             return {'CANCELLED'}
 
         item = props.slides.add()
         item.collection = active_coll
         props.active_index = len(props.slides) - 1
 
-        self.report({'INFO'}, "「%s」を追加しました" % active_coll.name)
+        self.report({'INFO'}, "Added \"%s\"" % active_coll.name)
         return {'FINISHED'}
 
 
 class BS_OT_remove(bpy.types.Operator):
     bl_idname = "blender_slide.remove"
-    bl_label = "削除"
-    bl_description = "選択中のスライドを一覧から削除"
+    bl_label = "Remove"
+    bl_description = "Remove the selected slide from the list"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         props = context.scene.blender_slide
@@ -195,8 +216,9 @@ class BS_OT_remove(bpy.types.Operator):
 
 class BS_OT_move(bpy.types.Operator):
     bl_idname = "blender_slide.move"
-    bl_label = "並べ替え"
-    bl_description = "スライドの順番を上下に移動"
+    bl_label = "Move"
+    bl_description = "Move the slide up or down in the list"
+    bl_options = {'REGISTER', 'UNDO'}
 
     direction: bpy.props.EnumProperty(
         items=[
@@ -226,8 +248,8 @@ class BS_OT_move(bpy.types.Operator):
 
 class BS_OT_next(bpy.types.Operator):
     bl_idname = "blender_slide.next"
-    bl_label = "次へ"
-    bl_description = "次のスライドへ"
+    bl_label = "Next"
+    bl_description = "Go to the next slide"
 
     def execute(self, context):
         props = context.scene.blender_slide
@@ -241,8 +263,8 @@ class BS_OT_next(bpy.types.Operator):
 
 class BS_OT_prev(bpy.types.Operator):
     bl_idname = "blender_slide.prev"
-    bl_label = "前へ"
-    bl_description = "前のスライドへ"
+    bl_label = "Previous"
+    bl_description = "Go to the previous slide"
 
     def execute(self, context):
         props = context.scene.blender_slide
@@ -256,8 +278,8 @@ class BS_OT_prev(bpy.types.Operator):
 
 class BS_OT_reset(bpy.types.Operator):
     bl_idname = "blender_slide.reset"
-    bl_label = "最初に戻る"
-    bl_description = "最初のスライドへ戻り、設定フレームへ移動する"
+    bl_label = "Back to Start"
+    bl_description = "Return to the first slide and jump to the start frame"
 
     def execute(self, context):
         props = context.scene.blender_slide
@@ -277,8 +299,9 @@ class BS_OT_reset(bpy.types.Operator):
 
 class BS_OT_refresh(bpy.types.Operator):
     bl_idname = "blender_slide.refresh"
-    bl_label = "表示を再適用"
-    bl_description = "現在のスライドの表示状態を再適用する（Outliner手動操作後の復旧用）"
+    bl_label = "Reapply Visibility"
+    bl_description = ("Reapply the current slide's visibility "
+                      "(recover after manual Outliner changes)")
 
     def execute(self, context):
         apply_slide_visibility(context)
@@ -287,8 +310,9 @@ class BS_OT_refresh(bpy.types.Operator):
 
 class BS_OT_clean(bpy.types.Operator):
     bl_idname = "blender_slide.clean"
-    bl_label = "無効スライドを削除"
-    bl_description = "コレクションが削除済み（未設定）のスライドを一覧から除去する"
+    bl_label = "Remove Invalid Slides"
+    bl_description = "Remove slides whose collections have been deleted"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         props = context.scene.blender_slide
@@ -305,9 +329,9 @@ class BS_OT_clean(bpy.types.Operator):
             props.active_index = 0
 
         if removed:
-            self.report({'INFO'}, "%d 件の無効スライドを削除しました" % removed)
+            self.report({'INFO'}, "Removed %d invalid slide(s)" % removed)
         else:
-            self.report({'INFO'}, "削除対象はありませんでした")
+            self.report({'INFO'}, "Nothing to remove")
 
         apply_slide_visibility(context)
         return {'FINISHED'}
@@ -315,8 +339,8 @@ class BS_OT_clean(bpy.types.Operator):
 
 class BS_OT_play_anim(bpy.types.Operator):
     bl_idname = "blender_slide.play_anim"
-    bl_label = "アニメ再生 / 停止"
-    bl_description = "タイムラインの再生・停止を切り替える"
+    bl_label = "Play / Pause Animation"
+    bl_description = "Toggle timeline playback"
 
     def execute(self, context):
         bpy.ops.screen.animation_play()
@@ -325,8 +349,9 @@ class BS_OT_play_anim(bpy.types.Operator):
 
 class BS_OT_make_workspace(bpy.types.Operator):
     bl_idname = "blender_slide.make_workspace"
-    bl_label = "プレゼン用WS生成"
-    bl_description = "発表用ワークスペースを作成（カメラビュー＋UI非表示）"
+    bl_label = "Presentation Workspace"
+    bl_description = ("Create a presentation workspace "
+                      "(camera view with UI hidden)")
 
     WS_NAME = "Presentation"
 
@@ -335,7 +360,7 @@ class BS_OT_make_workspace(bpy.types.Operator):
 
         if existing:
             context.window.workspace = existing
-            self.report({'INFO'}, "既存の Presentation に切り替えました")
+            self.report({'INFO'}, "Switched to the existing Presentation workspace")
             return {'FINISHED'}
 
         bpy.ops.workspace.duplicate()
@@ -364,15 +389,15 @@ class BS_OT_make_workspace(bpy.types.Operator):
                     configured = True
 
         if not configured:
-            self.report({'WARNING'}, "3Dビューが見つかりませんでした")
+            self.report({'WARNING'}, "No 3D Viewport found")
         else:
-            self.report({'INFO'}, "発表用ワークスペース『Presentation』を作成しました")
+            self.report({'INFO'}, "Created the \"Presentation\" workspace")
 
         return {'FINISHED'}
 
 
 # ============================================================
-# パネル（Nサイドバー）
+# Panel (N sidebar)
 # ============================================================
 class BS_PT_panel(bpy.types.Panel):
     bl_label = "Blender Slide"
@@ -385,7 +410,7 @@ class BS_PT_panel(bpy.types.Panel):
         layout = self.layout
         props = context.scene.blender_slide
 
-        layout.label(text="スライド一覧", icon='SEQUENCE')
+        layout.label(text="Slides", icon='SEQUENCE')
 
         row = layout.row()
         row.template_list(
@@ -410,43 +435,44 @@ class BS_PT_panel(bpy.types.Panel):
         cur = (props.active_index + 1) if n else 0
 
         header = box.row(align=True)
-        header.label(text="現在： %d / %d" % (cur, n))
+        header.label(text="Current: %d / %d" % (cur, n))
         header.operator("blender_slide.refresh", text="", icon='FILE_REFRESH')
 
         nav = box.row(align=True)
-        nav.operator("blender_slide.prev", text="前へ", icon='TRIA_LEFT')
-        nav.operator("blender_slide.next", text="次へ", icon='TRIA_RIGHT')
+        nav.operator("blender_slide.prev", text="Prev", icon='TRIA_LEFT')
+        nav.operator("blender_slide.next", text="Next", icon='TRIA_RIGHT')
 
         reset_row = box.row(align=True)
-        reset_row.operator("blender_slide.reset", text="最初に戻る", icon='LOOP_BACK')
-        reset_row.prop(props, "start_frame", text="フレーム")
+        reset_row.operator("blender_slide.reset", text="Back to Start", icon='LOOP_BACK')
+        reset_row.prop(props, "start_frame", text="Frame")
 
-        box.operator("blender_slide.play_anim", text="アニメ再生 / 停止", icon='PLAY')
+        box.operator("blender_slide.play_anim",
+                     text="Play / Pause Animation", icon='PLAY')
 
         box2 = layout.box()
-        box2.label(text="設定", icon='PREFERENCES')
+        box2.label(text="Settings", icon='PREFERENCES')
         box2.prop(props, "switch_method", expand=True)
 
         box2.operator(
             "blender_slide.make_workspace",
-            text="プレゼン用WS生成",
+            text="Presentation Workspace",
             icon='WINDOW',
         )
 
         box2.operator(
             "blender_slide.clean",
-            text="無効スライドを削除",
+            text="Remove Invalid Slides",
             icon='TRASH',
         )
 
         box2.label(
-            text="ショートカットは Preferences > Add-ons で有効化",
+            text="Enable shortcuts in Preferences > Add-ons",
             icon='INFO',
         )
 
 
 # ============================================================
-# ショートカット（既定OFF・アドオン設定で有効化）
+# Shortcuts (disabled by default; enable in add-on preferences)
 # ============================================================
 addon_keymaps = []
 
@@ -462,7 +488,7 @@ def _unregister_keymaps():
 
 
 def _register_keymaps():
-    # 多重登録防止
+    # Prevent duplicate registration
     _unregister_keymaps()
 
     wm = bpy.context.window_manager
@@ -492,10 +518,11 @@ class BS_Preferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     use_shortcuts: bpy.props.BoolProperty(
-        name="ショートカットを登録する（PageUp / PageDown）",
+        name="Register shortcuts (PageUp / PageDown)",
         description=(
-            "3Dビューで PageUp=前へ / PageDown=次へ を有効にします。"
-            "他アドオンや独自設定との競合が気になる場合はOFFのままにしてください"
+            "Enable PageUp = Previous / PageDown = Next in the 3D Viewport. "
+            "Leave this off if you are worried about conflicts with other "
+            "add-ons or custom key configurations"
         ),
         default=False,
         update=_update_shortcuts,
@@ -505,13 +532,14 @@ class BS_Preferences(bpy.types.AddonPreferences):
         layout = self.layout
         layout.prop(self, "use_shortcuts")
         layout.label(
-            text="キーの変更は Preferences > Keymap で blender_slide.next / prev を検索",
+            text=("To change the keys, search for blender_slide.next / prev "
+                  "in Preferences > Keymap"),
             icon='INFO',
         )
 
 
 # ============================================================
-# 登録
+# Registration
 # ============================================================
 classes = (
     BS_SlideItem,
