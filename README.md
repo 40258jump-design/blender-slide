@@ -16,11 +16,14 @@ Blender Slide is a Blender add-on that allows collections to be used as presenta
 
 ## Installation
 
-1. Download blender_slide.py
-2. Blender > Edit > Preferences > Add-ons
-3. Install from Disk
-4. Enable Blender Slide
+Requires Blender 4.2 or later.
 
+1. Download `blender_slide.py` from the latest release.
+2. Open Blender.
+3. Go to `Edit > Preferences > Add-ons`.
+4. Click `Install from Disk`.
+5. Select `blender_slide.py`.
+6. Enable `Blender Slide`.
 ## Blender Version
 
 4.2+
