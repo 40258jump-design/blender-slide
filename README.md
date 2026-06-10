@@ -24,9 +24,17 @@ Requires Blender 4.2 or later.
 4. Click `Install from Disk`.
 5. Select `blender_slide.py`.
 6. Enable `Blender Slide`.
+
+## Where to Find the Panel
+
+The Blender Slide panel is located in the 3D Viewport sidebar.
+
+Press `N` in the 3D Viewport, then open the `Blender Slide` tab.
+
 ## Blender Version
 
 4.2+
+
 ## Usage
 
 1. Create collections for each slide.
