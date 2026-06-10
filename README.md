@@ -33,7 +33,7 @@ Press `N` in the 3D Viewport, then open the `Blender Slide` tab.
 ## Usage
 
 1. Create Collections for each slide.
-2. Make the Collection you want to add active.
+2. Click the Collection you want to add in the Outliner to make it active.
 3. Click the `+` button in the Blender Slide panel to add it as a slide.
 4. Use `Prev` / `Next` to switch slides.
 5. Use `Presentation Workspace` to create a clean workspace optimized for presenting your slides.
@@ -44,7 +44,7 @@ The `Presentation Workspace` button creates a clean Blender workspace for presen
 
 It switches the 3D Viewport to camera view and hides overlays, gizmos, the toolbar, the sidebar, and the header.
 
-## Switch Methods
+## Slide Visibility Modes
 
 ### Exclude
 
