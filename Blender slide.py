@@ -5,8 +5,8 @@ bl_info = {
     "blender": (4, 2, 0),
     "location": "View3D > サイドバー(N) > Blender Slide",
     "description": "登録したコレクションをスライドとして表示切替するアドオン",
-    "doc_url": "",
-    "tracker_url": "",
+    "doc_url": "https://github.com/40258jump-design/blender-slide",
+    "tracker_url": "https://github.com/40258jump-design/blender-slide/issues",
     "category": "3D View",
 }
 
